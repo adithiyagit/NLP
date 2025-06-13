@@ -1,50 +1,65 @@
 import nltk
-from nltk.tokenize import TreebankWordTokenizer
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-import spacy
 
-
-# Load resources
+# Ensure necessary NLTK data packages are downloaded
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
 
-# Load spaCy English model
-nlp = spacy.load("en_core_web_sm")
+from nltk.tokenize import TreebankWordTokenizer
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
 
-# Read text
-with open('sample_text.txt', 'r') as file:
-    text = file.read()
+# Load text
+with open('sample_text.txt', 'r') as f:
+    text = f.read()
 
-print("Original Text:\n", text)
-
-# --------------------------------------------
-# 1. WORD TOKENIZATION (NLTK)
-# --------------------------------------------
+# NLTK Tokenization
 tokens = TreebankWordTokenizer().tokenize(text)
-print("\n1. Tokenized Words:")
+print("\n[NLTK] Tokens:")
 print(tokens)
 
-# --------------------------------------------
-# 2. STOPWORD REMOVAL (NLTK)
-# --------------------------------------------
-stop_words = set(stopwords.words("english"))
-filtered_tokens = [word for word in tokens if word.lower() not in stop_words and word.isalpha()]
-print("\n2. After Stopword Removal:")
+# Stopword Removal
+stop_words = set(stopwords.words('english'))
+filtered_tokens = [word for word in tokens if word.lower() not in stop_words]
+print("\n[NLTK] After Stopword Removal:")
 print(filtered_tokens)
 
-# --------------------------------------------
-# 3. STEMMING (NLTK)
-# --------------------------------------------
+# Stemming
 stemmer = PorterStemmer()
-stemmed_words = [stemmer.stem(word) for word in filtered_tokens]
-print("\n3. After Stemming:")
-print(stemmed_words)
+stemmed_tokens = [stemmer.stem(word) for word in filtered_tokens]
+print("\n[NLTK] After Stemming:")
+print(stemmed_tokens)
 
-# --------------------------------------------
-# 4. LEMMATIZATION (spaCy)
-# --------------------------------------------
+# Lemmatization
+lemmatizer = WordNetLemmatizer()
+lemmatized_tokens = [lemmatizer.lemmatize(word) for word in filtered_tokens]
+print("\n[NLTK] After Lemmatization:")
+print(lemmatized_tokens)
+
+# ---- spaCy Section ----
+
+import spacy
+
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+# Reuse the same text
 doc = nlp(text)
-lemmatized_words = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
-print("\n4. After Lemmatization (spaCy):")
-print(lemmatized_words)
+
+# spaCy Tokenization
+tokens = [token.text for token in doc]
+print("\n[spaCy] Tokens:")
+print(tokens)
+
+# Stopword Removal
+filtered_tokens_spacy = [token.text for token in doc if not token.is_stop]
+print("\n[spaCy] After Stopword Removal:")
+print(filtered_tokens_spacy)
+
+# Lemmatization
+lemmatized_tokens_spacy = [token.lemma_ for token in doc if not token.is_stop]
+print("\n[spaCy] After Lemmatization:")
+print(lemmatized_tokens_spacy)
+
+# Note: spaCy does NOT use stemming by design.
